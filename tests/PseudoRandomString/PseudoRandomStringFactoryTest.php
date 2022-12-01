@@ -24,9 +24,8 @@
 namespace Facebook\Tests\PseudoRandomString;
 
 use Facebook\PseudoRandomString\PseudoRandomStringGeneratorFactory;
-use PHPUnit_Framework_TestCase;
 
-class PseudoRandomStringFactoryTest extends PHPUnit_Framework_TestCase
+class PseudoRandomStringFactoryTest extends \Mockery\Adapter\Phpunit\MockeryTestCase
 {
     const COMMON_NAMESPACE = 'Facebook\PseudoRandomString\\';
     const COMMON_INTERFACE = 'Facebook\PseudoRandomString\PseudoRandomStringGeneratorInterface';
@@ -55,9 +54,6 @@ class PseudoRandomStringFactoryTest extends PHPUnit_Framework_TestCase
         ];
         if (function_exists('random_bytes')) {
             $providers[] = ['random_bytes', self::COMMON_NAMESPACE . 'RandomBytesPseudoRandomStringGenerator'];
-        }
-        if (function_exists('mcrypt_create_iv')) {
-            $providers[] = ['mcrypt', self::COMMON_NAMESPACE . 'McryptPseudoRandomStringGenerator'];
         }
         if (function_exists('openssl_random_pseudo_bytes')) {
             $providers[] = ['openssl', self::COMMON_NAMESPACE . 'OpenSslPseudoRandomStringGenerator'];

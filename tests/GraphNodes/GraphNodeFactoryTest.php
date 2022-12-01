@@ -28,14 +28,14 @@ use Facebook\FacebookRequest;
 use Facebook\FacebookResponse;
 use Facebook\GraphNodes\GraphNodeFactory;
 
-class GraphNodeFactoryTest extends \PHPUnit_Framework_TestCase
+class GraphNodeFactoryTest extends \Mockery\Adapter\Phpunit\MockeryTestCase
 {
     /**
      * @var \Facebook\FacebookRequest
      */
     protected $request;
 
-    protected function setUp()
+    protected function setUp(): void
     {
         $app = new FacebookApp('123', 'foo_app_secret');
         $this->request = new FacebookRequest(
@@ -56,17 +56,19 @@ class GraphNodeFactoryTest extends \PHPUnit_Framework_TestCase
 
         $factory = new GraphNodeFactory($res);
         $factory->validateResponseCastableAsGraphNode();
+
+        $this->assertTrue(true);
     }
 
-    /**
-     * @expectedException \Facebook\Exceptions\FacebookSDKException
-     */
     public function testANonGraphNodeResponseWillThrow()
     {
         $data = '{"data":[{"id":"123","name":"foo"},{"id":"1337","name":"bar"}]}';
         $res = new FacebookResponse($this->request, $data);
 
         $factory = new GraphNodeFactory($res);
+
+        $this->expectException(\Facebook\Exceptions\FacebookSDKException::class);
+
         $factory->validateResponseCastableAsGraphNode();
     }
 
@@ -77,17 +79,19 @@ class GraphNodeFactoryTest extends \PHPUnit_Framework_TestCase
 
         $factory = new GraphNodeFactory($res);
         $factory->validateResponseCastableAsGraphEdge();
+
+        $this->assertTrue(true);
     }
 
-    /**
-     * @expectedException \Facebook\Exceptions\FacebookSDKException
-     */
     public function testANonGraphEdgeResponseWillThrow()
     {
         $data = '{"id":"123","name":"foo"}';
         $res = new FacebookResponse($this->request, $data);
 
         $factory = new GraphNodeFactory($res);
+
+        $this->expectException(\Facebook\Exceptions\FacebookSDKException::class);
+
         $factory->validateResponseCastableAsGraphEdge();
     }
 
@@ -102,11 +106,10 @@ class GraphNodeFactoryTest extends \PHPUnit_Framework_TestCase
         $this->assertFalse($shouldFail, 'Expected the given array to not be castable as a GraphEdge.');
     }
 
-    /**
-     * @expectedException \Facebook\Exceptions\FacebookSDKException
-     */
     public function testInvalidSubClassesWillThrow()
     {
+        $this->expectException(\Facebook\Exceptions\FacebookSDKException::class);
+
         GraphNodeFactory::validateSubclass('FooSubClass');
     }
 
@@ -115,6 +118,8 @@ class GraphNodeFactoryTest extends \PHPUnit_Framework_TestCase
         GraphNodeFactory::validateSubclass('\Facebook\GraphNodes\GraphNode');
         GraphNodeFactory::validateSubclass('\Facebook\GraphNodes\GraphAlbum');
         GraphNodeFactory::validateSubclass('\Facebook\Tests\Fixtures\MyFooGraphNode');
+
+        $this->assertTrue(true);
     }
 
     public function testCastingAsASubClassObjectWillInstantiateTheSubClass()

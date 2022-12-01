@@ -34,16 +34,13 @@ use Facebook\Tests\Fixtures\FooClientInterface;
 use Facebook\Tests\Fixtures\FooPersistentDataInterface;
 use Facebook\Tests\Fixtures\FooUrlDetectionInterface;
 
-class FacebookTest extends \PHPUnit_Framework_TestCase
+class FacebookTest extends \Mockery\Adapter\Phpunit\MockeryTestCase
 {
     protected $config = [
         'app_id' => '1337',
         'app_secret' => 'foo_secret',
     ];
 
-    /**
-     * @expectedException \Facebook\Exceptions\FacebookSDKException
-     */
     public function testInstantiatingWithoutAppIdThrows()
     {
         // unset value so there is no fallback to test expected Exception
@@ -51,12 +48,12 @@ class FacebookTest extends \PHPUnit_Framework_TestCase
         $config = [
             'app_secret' => 'foo_secret',
         ];
+
+        $this->expectException(\Facebook\Exceptions\FacebookSDKException::class);
+
         new Facebook($config);
     }
 
-    /**
-     * @expectedException \Facebook\Exceptions\FacebookSDKException
-     */
     public function testInstantiatingWithoutAppSecretThrows()
     {
         // unset value so there is no fallback to test expected Exception
@@ -64,17 +61,20 @@ class FacebookTest extends \PHPUnit_Framework_TestCase
         $config = [
             'app_id' => 'foo_id',
         ];
+
+        $this->expectException(\Facebook\Exceptions\FacebookSDKException::class);
+
         new Facebook($config);
     }
 
-    /**
-     * @expectedException \InvalidArgumentException
-     */
     public function testSettingAnInvalidHttpClientHandlerThrows()
     {
         $config = array_merge($this->config, [
             'http_client_handler' => 'foo_handler',
         ]);
+
+        $this->expectException(\InvalidArgumentException::class);
+
         new Facebook($config);
     }
 
@@ -117,14 +117,14 @@ class FacebookTest extends \PHPUnit_Framework_TestCase
         );
     }
 
-    /**
-     * @expectedException \InvalidArgumentException
-     */
     public function testSettingAnInvalidPersistentDataHandlerThrows()
     {
         $config = array_merge($this->config, [
             'persistent_data_handler' => 'foo_handler',
         ]);
+
+        $this->expectException(\InvalidArgumentException::class);
+
         new Facebook($config);
     }
 
@@ -142,15 +142,12 @@ class FacebookTest extends \PHPUnit_Framework_TestCase
 
     public function testSettingAnInvalidUrlHandlerThrows()
     {
-        $expectedException = (PHP_MAJOR_VERSION > 5 && class_exists('TypeError'))
-            ? 'TypeError'
-            : 'PHPUnit_Framework_Error';
-
-        $this->setExpectedException($expectedException);
-
         $config = array_merge($this->config, [
             'url_detection_handler' => 'foo_handler',
         ]);
+
+        $this->expectException(\TypeError::class);
+
         new Facebook($config);
     }
 
@@ -180,14 +177,14 @@ class FacebookTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('bar_token', (string)$accessToken);
     }
 
-    /**
-     * @expectedException \InvalidArgumentException
-     */
     public function testSettingAnInvalidPseudoRandomStringGeneratorThrows()
     {
         $config = array_merge($this->config, [
             'pseudo_random_string_generator' => 'foo_generator',
         ]);
+
+        $this->expectException(\InvalidArgumentException::class);
+
         new Facebook($config);
     }
 
@@ -206,25 +203,6 @@ class FacebookTest extends \PHPUnit_Framework_TestCase
         $fb = new Facebook($config);
         $this->assertInstanceOf(
             'Facebook\PseudoRandomString\RandomBytesPseudoRandomStringGenerator',
-            $fb->getRedirectLoginHelper()->getPseudoRandomStringGenerator()
-        );
-    }
-
-    public function testMcryptCsprgCanBeForced()
-    {
-        if (!function_exists('mcrypt_create_iv')) {
-            $this->markTestSkipped(
-                'Mcrypt must be installed to test mcrypt_create_iv().'
-            );
-        }
-
-        $config = array_merge($this->config, [
-            'persistent_data_handler' => 'memory', // To keep session errors from happening
-            'pseudo_random_string_generator' => 'mcrypt'
-        ]);
-        $fb = new Facebook($config);
-        $this->assertInstanceOf(
-            'Facebook\PseudoRandomString\McryptPseudoRandomStringGenerator',
             $fb->getRedirectLoginHelper()->getPseudoRandomStringGenerator()
         );
     }
@@ -273,14 +251,14 @@ class FacebookTest extends \PHPUnit_Framework_TestCase
         );
     }
 
-    /**
-     * @expectedException \InvalidArgumentException
-     */
     public function testSettingAnAccessThatIsNotStringOrAccessTokenThrows()
     {
         $config = array_merge($this->config, [
             'default_access_token' => 123,
         ]);
+
+        $this->expectException(\InvalidArgumentException::class);
+
         new Facebook($config);
     }
 
@@ -402,9 +380,6 @@ class FacebookTest extends \PHPUnit_Framework_TestCase
         ], $response);
     }
 
-    /**
-     * @expectedException \Facebook\Exceptions\FacebookResponseException
-     */
     public function testMaxingOutRetriesWillThrow()
     {
         $client = new FakeGraphApiForResumableUpload();
@@ -414,6 +389,9 @@ class FacebookTest extends \PHPUnit_Framework_TestCase
           'http_client_handler' => $client,
         ]);
         $fb = new Facebook($config);
+
+        $this->expectException(\Facebook\Exceptions\FacebookResponseException::class);
+
         $fb->uploadVideo('4', __DIR__.'/foo.txt', [], 'foo-token', 3);
     }
 }
