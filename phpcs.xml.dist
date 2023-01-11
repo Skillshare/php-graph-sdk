@@ -2,6 +2,16 @@
 <ruleset>
     <file>src/</file>
     <file>tests/</file>
-    <arg value="spn" />
-    <rule ref="PSR2" />
+
+    <arg value="sp" />
+
+    <!-- Configure PHPCompatibility to check compatibility for PHP 7.4 and higher. -->
+    <config name="testVersion" value="7.4-"/>
+    <rule ref="PHPCompatibility">
+        <exclude name="PHPCompatibility.Attributes.NewAttributes.Found"/>
+    </rule>
+
+    <rule ref="PSR2">
+        <exclude name="Generic.Files.LineLength.TooLong"/>
+    </rule>
 </ruleset>
